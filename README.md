@@ -168,7 +168,7 @@ Generated `site/data/health.json` and `site/data/incidents.json` files are inten
 
    Enter your **Network Controller login password** when prompted. The collector authenticates and refreshes the health snapshot every 60 seconds. Keep the Terminal session running. Press `Ctrl+C` to stop it.
 
-**Note:** These steps reproduce the dashboard and collector when a compatible Packet Tracer simulation is already configured. The project's `.pkt` network file is not included in this repository.
+**Note:** These steps reproduce the dashboard and collector when a compatible Packet Tracer simulation is already configured. The project's `.pkt` network file has not yet been included. See the [Packet Tracer lab guide](packet-tracer/README.md) for configuration checks and a security checklist before sharing the simulation.
 
 ## Known limitations
 
