@@ -75,6 +75,50 @@ A controlled test powered off the **HR PC5** in Packet Tracer. Its ping test fai
 
 A separate monitoring-reliability test stopped the Python collector. The dashboard showed a **stale-data warning** and cleared it once fresh collection resumed. The saved incident history remained intact.
 
+## Screenshots and validation evidence
+
+The following captures show the real **Packet Tracer simulation and locally hosted dashboard**, including a controlled outage and subsequent recovery.
+
+### 1. Cisco network topology
+
+![Cisco Packet Tracer network topology showing a router, switch, controller and six PCs](screenshots/01-network-topology.png)
+
+The simulated small-business network includes six workstations across three departmental VLANs.
+
+### 2. VLAN segmentation
+
+![Switch VLAN configuration from the Cisco lab](screenshots/02-vlan-segmentation.png)
+
+Switch configuration demonstrates logical separation between IT, Finance and HR.
+
+### 3. Controller health reporting
+
+![Packet Tracer Network Controller health display](screenshots/04-controller-health.png)
+
+The Network Controller provides the health snapshot used by the collector. Controller inventory and switch-health reporting have known limitations, discussed below.
+
+### 4. Python data collector
+
+![Python collector gathering monitoring data](screenshots/05-python-data-collector.png)
+
+The macOS collector authenticates to the Packet Tracer API and updates the JSON snapshot used by the Docker-served dashboard.
+
+### 5. Simulated outage alert
+
+![Host-health warning in monitoring dashboard](screenshots/07-host-health-alert.png)
+
+During the controlled PC5 outage, aggregate host reachability dropped from 100% to 83%, triggering a dashboard alert.
+
+### 6. Recovery and incident history
+
+![Resolved incident history in the dashboard](screenshots/09-resolved-incident-history.png)
+
+After the workstation was restored, reachability returned to 100% and the recorded incident was resolved.
+
+**Additional evidence:** [DHCP configuration](screenshots/03-dhcp-configuration.png) · [Failed connectivity test](screenshots/06-ping-outage.png) · [Recovery notification](screenshots/08-recovery-notification.png) · [Syslog link events](screenshots/10-syslog-link-events.png)
+
+See the [detailed incident report](docs/INCIDENT-REPORT.md) for the test procedure, timestamps, limitations and results.
+
 ## Project files
 
 ```text
