@@ -4,6 +4,8 @@ A practical IT Support and infrastructure lab combining a **simulated Cisco smal
 
 This project demonstrates network administration, troubleshooting, service monitoring, Python automation and incident documentation.
 
+**Open the actual simulation:** [Small-Business-Network-Lab-git.pkt](packet-tracer/Small-Business-Network-Lab-git.pkt) · [Packet Tracer setup and verification guide](packet-tracer/README.md)
+
 ## Technologies
 
 Cisco Packet Tracer · Cisco Network Controller REST API · Python 3 · Docker Desktop · Nginx · HTML/CSS/JavaScript · Git
@@ -127,9 +129,16 @@ See the [detailed incident report](docs/INCIDENT-REPORT.md) for the test procedu
 ├── .gitignore
 ├── collector.py
 ├── incident_history.py
+├── docs/
+│   └── INCIDENT-REPORT.md
 ├── examples/
 │   ├── health.example.json
 │   └── incidents.example.json
+├── packet-tracer/
+│   ├── Small-Business-Network-Lab-git.pkt
+│   └── README.md
+├── screenshots/
+│   └── 01-network-topology.png ... 10-syslog-link-events.png
 └── site/
     └── index.html
 ```
@@ -138,7 +147,7 @@ Generated `site/data/health.json` and `site/data/incidents.json` files are inten
 
 ## Run locally
 
-**Prerequisites:** Docker Desktop, Python 3, Cisco Packet Tracer, and a configured Packet Tracer Network Controller with **Real World / External REST API access** enabled on local port **58000**.
+**Prerequisites:** Docker Desktop, Python 3, Cisco Packet Tracer, and the [included Packet Tracer simulation](packet-tracer/Small-Business-Network-Lab-git.pkt) with a configured Network Controller. Enable **Real World / External REST API access** on local port **58000**.
 
 1. From the cloned repository, create an offline preview using the **fictional** example data:
 
@@ -168,7 +177,7 @@ Generated `site/data/health.json` and `site/data/incidents.json` files are inten
 
    Enter your **Network Controller login password** when prompted. The collector authenticates and refreshes the health snapshot every 60 seconds. Keep the Terminal session running. Press `Ctrl+C` to stop it.
 
-**Note:** These steps reproduce the dashboard and collector when a compatible Packet Tracer simulation is already configured. The project's `.pkt` network file has not yet been included. See the [Packet Tracer lab guide](packet-tracer/README.md) for configuration checks and a security checklist before sharing the simulation.
+**Note:** The Cisco simulation is included in [`packet-tracer/Small-Business-Network-Lab-git.pkt`](packet-tracer/Small-Business-Network-Lab-git.pkt). Open it in Cisco Packet Tracer and follow the [configuration and verification guide](packet-tracer/README.md). The controller may require configuration or re-enabling the external API when reopening the simulation.
 
 ## Known limitations
 
@@ -180,7 +189,7 @@ Generated `site/data/health.json` and `site/data/incidents.json` files are inten
 
 ## Security notes
 
-The repository contains no authentication tickets or embedded account passwords. The collector asks for a password interactively; the Nginx port is bound to `127.0.0.1`; and runtime data is excluded through `.gitignore`. Review Cisco Packet Tracer `.pkt` files for saved device credentials before sharing them.
+The Python source code does not embed authentication tickets or account passwords: the collector asks for a password interactively, the Nginx port is bound to `127.0.0.1`, and runtime data is excluded through `.gitignore`. **The included Packet Tracer `.pkt` file is binary and its embedded device/controller credentials could not be independently verified outside Packet Tracer.** Review the simulation inside Packet Tracer and ensure all saved credentials are disposable lab-only values before making the repository public.
 
 ## Skills demonstrated
 
