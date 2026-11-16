@@ -1,39 +1,52 @@
-# Cisco Packet Tracer Network Lab
+# Cisco Packet Tracer — Small Business Network Lab
 
-This directory includes the saved Cisco Packet Tracer **Small Business Network Lab** simulation: **[Small-Business-Network-Lab-git.pkt](Small-Business-Network-Lab-git.pkt)** (64,090 bytes). Open this file with Cisco Packet Tracer to inspect and test the simulated topology and configurations.
+This folder contains the [Cisco Packet Tracer simulation](Small-Business-Network-Lab-git.pkt) used in the [Small Business Network Monitoring Lab](../README.md).
 
-The uploaded file matches the user-supplied `.pkt` byte-for-byte (Git blob SHA `4c9c615a2f10b37392b7c880fbf3d0b7eac25bf4`). This establishes file integrity, **not** that the simulation has been run or that embedded device credentials are safe.
+The lab models a small business network with three departments, inter-VLAN routing, DHCP, access restrictions and a Packet Tracer Network Controller that supplies health data to a separate Python/Docker monitoring dashboard.
 
-## What the simulation demonstrates
+## Network topology
 
-| Component | Configuration described in the lab |
-| --- | --- |
-| Router | Cisco 2911, router-on-a-stick for IT/Finance/HR VLANs |
-| Switch | Cisco 2960, VLAN access ports and trunk to the router |
-| IT | VLAN 10, `192.168.10.0/24` |
-| Finance | VLAN 20, `192.168.20.0/24` |
-| HR | VLAN 30, `192.168.30.0/24` |
-| Hosts | Six simulated employee workstations |
-| Controller | Packet Tracer Network Controller, intended for localhost REST API monitoring |
+| Department | VLAN | Subnet | Default gateway |
+| --- | --- | --- | --- |
+| IT | 10 | `192.168.10.0/24` | `192.168.10.1` |
+| Finance | 20 | `192.168.20.0/24` | `192.168.20.1` |
+| HR | 30 | `192.168.30.0/24` | `192.168.30.1` |
 
-### Expected configuration checks
+**Devices:** Cisco 2911 router, Cisco 2960 switch, six simulated workstations and one Packet Tracer Network Controller.
 
-1. Open the simulation with Cisco Packet Tracer and wait for interfaces to settle.
-2. On the switch, inspect `show vlan brief` and `show interfaces trunk`.
-3. On the router, inspect `show ip interface brief` and `show ip route`.
-4. Test DHCP assignment where applicable and check hosts have the intended subnet and default gateway.
-5. Test **HR-to-Finance restriction** (blocked), **HR-to-IT** and **IT-to-Finance** connectivity (allowed by the configured ACL policy).
-6. Check the controller health display; note that the operational router was **not added to controller inventory** during the original lab.
-7. For the separate Docker dashboard, enable the Packet Tracer controller external/local REST API access and run the host-side Python collector described in the [project README](../README.md).
+![Cisco Packet Tracer topology](../screenshots/01-network-topology.png)
 
-## Security before sharing a `.pkt`
+## Features configured
 
-Packet Tracer saves device and controller configurations in the project file. Before making the repository **public**, **open it inside Packet Tracer** and ensure the simulation contains no real or reused passwords, personal information, authentication tokens or sensitive details.
+- Departmental VLANs and access-port assignments
+- 802.1Q trunk between router and switch
+- Router-on-a-stick inter-VLAN routing
+- DHCP pools for IT, Finance and HR
+- Extended ACL restricting HR-to-Finance traffic
+- SSH-based router and switch administration
+- Switch management addressing and buffered syslog events
 
-Replace lab-only credentials on the copied simulation rather than reusing credentials from other services. Review local router/switch login secrets, console and VTY lines, SSH administrator accounts, and the Network Controller account. Retain the original private lab file separately.
+## Open and verify the lab
 
-The absence of readable password strings in a raw binary-file scan **does not** prove that no secrets are stored.
+1. Download [Small-Business-Network-Lab-git.pkt](Small-Business-Network-Lab-git.pkt) and open it in **Cisco Packet Tracer**.
+2. Check VLAN assignments on the switch using `show vlan brief` and the trunk using `show interfaces trunk`.
+3. On the router, inspect `show ip interface brief` and `show ip route` to confirm the three VLAN interfaces and routing.
+4. Inspect DHCP-assigned host addresses and their default gateways.
+5. Test connectivity. The configured policy blocks **HR → Finance** while allowing **HR → IT** and **IT → Finance**.
+6. Examine the Packet Tracer Network Controller's health and inventory views.
 
-## Evidence
+## Monitoring integration
 
-The [screenshots directory](../screenshots) and [incident report](../docs/INCIDENT-REPORT.md) demonstrate the configuration and an intentionally induced workstation outage.
+The Network Controller exposes a REST API to the Python collector running on macOS. The collector saves health snapshots and incident records, which the Docker-hosted Nginx dashboard serves locally.
+
+For the dashboard setup and collector commands, see the [main project README](../README.md).
+
+**Known limitation:** The router was operational in the simulation but did not appear in the controller's managed inventory during testing. The controller's switch-health reporting also fluctuated.
+
+## Supporting evidence
+
+- [VLAN configuration](../screenshots/02-vlan-segmentation.png)
+- [DHCP configuration](../screenshots/03-dhcp-configuration.png)
+- [Controller health](../screenshots/04-controller-health.png)
+- [Switch syslog events](../screenshots/10-syslog-link-events.png)
+- [Documented incident test](../docs/INCIDENT-REPORT.md)
