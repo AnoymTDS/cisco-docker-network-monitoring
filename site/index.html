@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Small Business Network Monitor</title>
+  <style>
+    body {
+      background: #101827;
+      color: #f1f5f9;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+    }
+    header { margin-bottom: 32px; }
+    h1 { margin-bottom: 8px; }
+    p { color: #94a3b8; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-top: 16px;
+      overflow-wrap: anywhere;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      cursor: pointer;
+      margin-top: 24px;
+    }
+  
+    .monitor-status {
+      padding: 16px;
+      margin: 20px 0;
+      background: #1e293b;
+      border-left: 5px solid #64748b;
+      border-radius: 8px;
+    }
+    .monitor-status.ok { border-color: #22c55e; }
+    .monitor-status.warning { border-color: #f59e0b; }
+    .monitor-status.recovered { border-color: #22c55e; }
+    
+
+    .history {
+      margin-top: 32px;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .history-table th,
+    .history-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    .history-table th {
+      color: #94a3b8;
+    }
+
+</style>
+</head>
+<body>
+  <header>
+    <h1>Small Business Network Monitor</h1>
+    <p>Cisco Packet Tracer + Docker Infrastructure Lab</p>
+    <p>Monitoring data: saved controller snapshot</p>
+  </header>
+
+  <div id="monitor-status" class="monitor-status">Checking network health...</div>
+<main class="cards">
+    <div class="card">
+      <p>Connected Hosts</p>
+      <div class="value" id="hosts">Loading...</div>
+    </div>
+
+    <div class="card">
+      <p>Host Health</p>
+      <div class="value" id="host-health">Loading...</div>
+    </div>
+
+    <div class="card">
+      <p>Switch Health</p>
+      <div class="value" id="switch-health">Loading...</div>
+    </div>
+
+    <div class="card">
+      <p>Routers Inventoried</p>
+      <div class="value" id="routers">Loading...</div>
+    </div>
+  </main>
+
+  
+  <section class="history">
+    <h2>Incident History</h2>
+    <p id="history-status">Loading incidents...</p>
+
+    <div style="overflow-x:auto">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Incident ID</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Detected</th>
+            <th>Resolved</th>
+            <th>Health at Detection</th>
+          </tr>
+        </thead>
+        <tbody id="incident-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+<button onclick="loadHealth()">Refresh Saved Data</button>
+  <p id="updated">Waiting for monitoring data...</p>
+
+  <script>
+
+    let previousHostHealth = null;
+    let recoveryTime = null;
+
+    function updateMonitorStatus(data, response) {
+      const banner = document.getElementById("monitor-status");
+      const health = Number(data.hosts?.totalPercentage);
+      const timestamp = data.collectedAt ||
+        response.headers.get("Last-Modified");
+
+      const age = (Date.now() - Date.parse(timestamp || "")) / 1000;
+
+      const sw = (data.devices || []).find(
+        d => d.deviceType === "Switches"
+      );
+      const parts = sw ? sw.healthyRatio.split(":") : [];
+      const healthySwitches = Number(parts[0]);
+      const totalSwitches = Number(parts[1]);
+
+      let status = "ok";
+      let message = "Hosts reachable: 100%. Monitoring operational.";
+
+      if (!Number.isFinite(age) || age > 150 || age < -30) {
+        status = "warning";
+        message = "WARNING: Monitoring data is stale or missing.";
+      } else if (!Number.isFinite(health)) {
+        status = "warning";
+        message = "WARNING: Host health data is unavailable.";
+      } else {
+        if (previousHostHealth !== null &&
+            previousHostHealth < 100 && health === 100) {
+          recoveryTime = new Date().toLocaleTimeString();
+        }
+
+        previousHostHealth = health;
+
+        if (health < 100) {
+          status = "warning";
+          message = "INCIDENT: Host reachability dropped to " +
+                    health + "%.";
+        } else if (totalSwitches > 0 &&
+                   healthySwitches < totalSwitches) {
+          status = "warning";
+          message = "WARNING: Only " + healthySwitches +
+                    "/" + totalSwitches + " switches healthy.";
+        } else if (recoveryTime !== null) {
+          status = "recovered";
+          message = "RECOVERED: Host reachability returned to " +
+                    "100% at " + recoveryTime + ".";
+        }
+      }
+
+      banner.className = "monitor-status " + status;
+      banner.textContent = message;
+    }
+
+        async function loadHealth() {
+      try {
+        const response = await fetch(
+          "/data/health.json?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+        updateMonitorStatus(data, response);
+        const devices = data.devices || [];
+
+        const switches = devices.find(
+          d => d.deviceType === "Switches"
+        );
+        const routers = devices.find(
+          d => d.deviceType === "Routers"
+        );
+
+        document.getElementById("hosts").textContent =
+          data.hosts.totalConnected;
+
+        document.getElementById("host-health").textContent =
+          data.hosts.totalPercentage + "%";
+
+        document.getElementById("switch-health").textContent =
+          switches ? switches.healthyRatio + " healthy" : "Unknown";
+
+        document.getElementById("routers").textContent =
+          routers ? routers.healthyRatio.split(":")[1] : "Unknown";
+
+        const modified = response.headers.get("Last-Modified");
+        document.getElementById("updated").textContent =
+          modified
+            ? "Snapshot last modified: " + new Date(modified).toLocaleString()
+            : "Saved snapshot loaded successfully";
+
+      } catch (error) {
+        document.getElementById("updated").textContent =
+          "Unable to load monitoring data: " + error.message;
+      }
+    }
+
+
+    async function loadIncidents() {
+      const rows = document.getElementById("incident-rows");
+      const status = document.getElementById("history-status");
+
+      try {
+        const response = await fetch(
+          "/data/incidents.json?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (response.status === 404) {
+          rows.replaceChildren();
+          status.textContent = "No incidents recorded yet.";
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+
+        const incidents = await response.json();
+
+        if (!Array.isArray(incidents)) {
+          throw new Error("Invalid incident history format");
+        }
+
+        rows.replaceChildren();
+
+        for (const incident of incidents.slice().reverse()) {
+          const row = document.createElement("tr");
+
+          const values = [
+            incident.id,
+            incident.type,
+            incident.status,
+            incident.detectedAt
+              ? new Date(incident.detectedAt).toLocaleString()
+              : "-",
+            incident.resolvedAt
+              ? new Date(incident.resolvedAt).toLocaleString()
+              : "Not resolved",
+            incident.detectedHealth + "%"
+          ];
+
+          for (const value of values) {
+            const cell = document.createElement("td");
+            cell.textContent = String(value ?? "-");
+            row.appendChild(cell);
+          }
+
+          rows.appendChild(row);
+        }
+
+        status.textContent =
+          incidents.length + " incident(s) recorded.";
+
+      } catch (error) {
+        status.textContent =
+          "Unable to load incidents: " + error.message;
+      }
+    }
+
+    loadIncidents();
+    setInterval(loadIncidents, 15000);
+
+    loadHealth();
+    setInterval(loadHealth, 15000);
+  </script>
+</body>
+</html>

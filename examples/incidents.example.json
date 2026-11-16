@@ -1,0 +1,11 @@
+[
+  {
+    "id": "INC-EXAMPLE-001",
+    "type": "Host reachability degraded",
+    "status": "Resolved",
+    "detectedAt": "2026-11-16T12:00:00+00:00",
+    "detectedHealth": 83.0,
+    "resolvedAt": "2026-11-16T12:03:00+00:00",
+    "recoveredHealth": 100.0
+  }
+]

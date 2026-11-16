@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.pyc
+
+# Operating system files
+.DS_Store
+
+# Credentials and local settings
+.env
+*.log
+
+# Generated monitoring data
+site/data/health.json
+site/data/incidents.json
+
+# Local backups
+index-backup.html
+collector-backup.py
+index-before-alerts.html
