@@ -1,6 +1,8 @@
 # Cisco Packet Tracer Network Lab
 
-This directory is intended for the saved Cisco Packet Tracer **Small Business Network Lab** simulation (`.pkt`).
+This directory includes the saved Cisco Packet Tracer **Small Business Network Lab** simulation: **[Small-Business-Network-Lab-git.pkt](Small-Business-Network-Lab-git.pkt)** (64,090 bytes). Open this file with Cisco Packet Tracer to inspect and test the simulated topology and configurations.
+
+The uploaded file matches the user-supplied `.pkt` byte-for-byte (Git blob SHA `4c9c615a2f10b37392b7c880fbf3d0b7eac25bf4`). This establishes file integrity, **not** that the simulation has been run or that embedded device credentials are safe.
 
 ## What the simulation demonstrates
 
@@ -26,7 +28,7 @@ This directory is intended for the saved Cisco Packet Tracer **Small Business Ne
 
 ## Security before sharing a `.pkt`
 
-Packet Tracer saves device and controller configurations in the project file. Before adding a public copy, **open it inside Packet Tracer** and ensure the simulation contains no real or reused passwords, personal information, authentication tokens or sensitive details.
+Packet Tracer saves device and controller configurations in the project file. Before making the repository **public**, **open it inside Packet Tracer** and ensure the simulation contains no real or reused passwords, personal information, authentication tokens or sensitive details.
 
 Replace lab-only credentials on the copied simulation rather than reusing credentials from other services. Review local router/switch login secrets, console and VTY lines, SSH administrator accounts, and the Network Controller account. Retain the original private lab file separately.
 
